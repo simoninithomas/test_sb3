@@ -196,6 +196,8 @@ def push_to_hub2(model,
     repo_local_path = Path(local_repo_path) / repo_name
     repo = Repository(repo_local_path, clone_from=repo_url, use_auth_token=use_auth_token)
     repo.git_pull(rebase=True)
+    
+    repo.lfs_track(["*.mp4"])
 
     # Step 1: Save the model
     saved_model = model.save(Path(repo_local_path) / model_name)
