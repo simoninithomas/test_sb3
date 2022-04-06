@@ -88,7 +88,7 @@ def _generate_replay(model, eval_env, video_length, is_deterministic, repo_local
 
         os.rename(env.video_recorder.path, "replay.mp4")
         
-        shutil.move(os.path.join("./", "replay.mp4), os.path.join(repo_local_path, "replay.mp4"))
+        shutil.move(os.path.join("./", "replay.mp4"), os.path.join(repo_local_path, "replay.mp4"))
     except KeyboardInterrupt:
         pass
 
