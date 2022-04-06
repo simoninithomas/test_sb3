@@ -17,7 +17,7 @@ import pickle5
 import json
 import gym
 import zipfile
-from datetime import datetime
+
 
 
 def _generate_config(model, repo_local_path):
@@ -51,8 +51,7 @@ def _evaluate_agent(model, eval_env, n_eval_episodes, is_deterministic, repo_loc
         "mean_reward": mean_reward,
         "std_reward": std_reward,
         "is_deterministic": is_deterministic,
-        "n_eval_episodes": n_eval_episodes,
-        "evaluate_date": datetime.now()
+        "n_eval_episodes": n_eval_episodes
     }
 
     # Write a JSON file
