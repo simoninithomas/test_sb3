@@ -9,7 +9,7 @@ setup(
     name='huggingface_sb3_test',
     version='1.0.7',
     packages=['huggingface_sb3_test'],
-    url='https://github.com/huggingface/huggingface_sb3',
+    url='https://github.com/simoninithomas/test_sb3',
     license='Apache',
     author='Thomas Simonini, Omar Sanseviero and Hugging Face Team',
     author_email='thomas.simonini@huggingface.co',
