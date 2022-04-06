@@ -244,21 +244,6 @@ tags:
 # TODO: Fill this model card
 """
 
-def _create_model_card(repo_dir: Path):
-    """
-    Creates a model card for the repository.
-    :param repo_dir:
-    """
-    readme_path = repo_dir / "README.md"
-    readme = ""
-    if readme_path.exists():
-      with readme_path.open("r", encoding="utf8") as f:
-          readme = f.read()
-    else:
-      readme = README_TEMPLATE
-    with readme_path.open("w", encoding="utf-8") as f:
-        f.write(readme)
-
 def _copy_file(filepath: Path, dst_directory: Path):
     """
     Copy the file to the correct directory
