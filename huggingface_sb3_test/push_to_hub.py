@@ -11,7 +11,7 @@ import stable_baselines3
 from stable_baselines3 import *
 from stable_baselines3.common.vec_env import *
 from stable_baselines3.common.env_util import *
-from stable_baselines3.common.evaluation import *
+from stable_baselines3.common.evaluation import evaluate_policy
 
 import pickle5
 import json
