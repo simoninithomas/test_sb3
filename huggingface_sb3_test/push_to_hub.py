@@ -80,6 +80,7 @@ def _generate_replay(model, eval_env, video_length, is_deterministic, repo_local
         for _ in range(video_length + 1):
             action, _ = model.predict(obs, deterministic=is_deterministic)
             obs, _, _, _ = env.step(action)
+            env.render()
 
         # Save the video
         env.close()
