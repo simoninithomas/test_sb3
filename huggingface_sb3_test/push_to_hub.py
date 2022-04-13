@@ -18,9 +18,22 @@ import json
 import gym
 import zipfile
 
+from subprocess import call
 
+README_TEMPLATE = """---
+tags:
+- deep-reinforcement-learning
+- reinforcement-learning
+---
+# TODO: Fill this model card
+"""
 
 def _generate_config(model, repo_local_path):
+    """
+    Generate a config.json file containing information about the agent and the environment
+    :param model: name of the model zip file
+    :param repo_local_path: path of the local repository
+    """
     unzipped_model_folder = model
 
     # Check if the user forgot to mention the extension of the file
@@ -37,16 +50,24 @@ def _generate_config(model, repo_local_path):
         # Add system_info elements to our JSON
         data["system_info"] = stable_baselines3.get_system_info(print_info=False)[0]
 
-        # Write our config.json file
+    # Step 3: Write our config.json file
     with open(Path(repo_local_path) / 'config.json', 'w') as outfile:
         json.dump(data, outfile)
 
 
 def _evaluate_agent(model, eval_env, n_eval_episodes, is_deterministic, repo_local_path):
-    print("IS DETERMINISTIC", is_deterministic)
+    """
+    Evaluate the agent using SB3 evaluate_policy method and create a results.json
+    :param model: name of the model zip file
+    :param eval_env: environment used to evaluate the agent
+    :param n_eval_episodes: number of evaluation episodes (by default: 10)
+    :param is_deterministic: use deterministic or stochastic actions
+    :param repo_local_path: path of the local repository
+    """
+    # Step 1: Evaluate the agent
     mean_reward, std_reward = evaluate_policy(model, eval_env, n_eval_episodes, is_deterministic)
 
-    # Create json evaluation
+    # Step 2: Create json evaluation
     evaluate_data = {
         "mean_reward": mean_reward,
         "std_reward": std_reward,
@@ -54,17 +75,32 @@ def _evaluate_agent(model, eval_env, n_eval_episodes, is_deterministic, repo_loc
         "n_eval_episodes": n_eval_episodes
     }
 
-    # Write a JSON file
+    # Step 3: Write a JSON file
     with open(Path(repo_local_path) / 'results.json', 'w') as outfile:
         json.dump(evaluate_data, outfile)
     return mean_reward, std_reward
 
+
 def is_atari(env_id: str) -> bool:
+    """
+    Check if the environment is an Atari one
+    (Taken from RL-Baselines3-zoo)
+    :param env_id: name of the environment
+    """
     entry_point = gym.envs.registry.env_specs[env_id].entry_point
     return "AtariEnv" in str(entry_point)
 
 
 def _generate_replay(model, eval_env, video_length, is_deterministic, repo_local_path):
+    """
+    Generate a replay video of the agent
+    :param model: name of the model
+    :param eval_env: environment used to evaluate the agent
+    :param video_length: length of the video (in timesteps)
+    :param is_deterministic: use deterministic or stochastic actions
+    :param repo_local_path: path of the local repository
+    """
+    # Step 1: Create the VecVideoRecorder
     env = VecVideoRecorder(
         eval_env,
         "./",  # Temporary video folder
@@ -76,7 +112,6 @@ def _generate_replay(model, eval_env, video_length, is_deterministic, repo_local
     obs = env.reset()
     env.reset()
     try:
-        print("DO IT")
         for _ in range(video_length + 1):
             action, _ = model.predict(obs, deterministic=is_deterministic)
             obs, _, _, _ = env.step(action)
@@ -85,35 +120,56 @@ def _generate_replay(model, eval_env, video_length, is_deterministic, repo_local
         # Save the video
         env.close()
 
-        # Move the video
+        # Rename the video
+        os.rename(env.video_recorder.path, "test.mp4")
 
-        os.rename(env.video_recorder.path, "replay.mp4")
-        
+        # Convert the video with x264 codec
+        inp = "./test.mp4"
+        out = "replay.mp4"
+        os.system(f"ffmpeg -i {inp} -vcodec h264 {out}".format(inp, out))
+        """
+        call([ffmpeg,
+              '-i', "./replay.mp4",
+              '-vcodec', h264,
+              replay.mp4])
+        """
+        # Move the video
         shutil.move(os.path.join("./", "replay.mp4"), os.path.join(repo_local_path, "replay.mp4"))
     except KeyboardInterrupt:
         pass
+    except:
+        # Add a message for video
+        print("We are unable to generate a replay of your agent")
+        print("Please send a message to thomas.simonini@huggingface.co")
 
 
 def select_tags(env_id):
     """
-    if (is_atari(env_id)):
-      env = "atari"
-    else:
-      env = ""
+    Define the tags for the model card
+    :param env_id: name of the environment
     """
 
     model_card = f"""
----
-  tags:
-  - {env_id}
----
-"""
+    ---
+      tags:
+      - {env_id}
+    ---
+    """
     return model_card
 
 
 def _generate_model_card(model_name, env_id, mean_reward, std_reward):
+    """
+    Generate the model card for the Hub
+    :param model_name: name of the model
+    :env_id: name of the environment
+    :mean_reward: mean reward of the agent
+    :std_reward: standard deviation of the mean reward of the agent
+    """
+    # Step 1: Select the tags
     model_card = select_tags(env_id)
 
+    # Step 2: Generate the model card
     model_card += f"""
   # **{model_name}** Agent playing **{env_id}**
   This is a trained model of a **{model_name}** agent playing **{env_id}** using the [stable-baselines3 library](https://github.com/DLR-RM/stable-baselines3).
@@ -138,6 +194,8 @@ def _create_model_card(repo_dir: Path, generated_model_card):
     """Creates a model card for the repository.
     TODO: Add metrics to model-index
     TODO: Use information from common model cards
+    :param repo_dir: repository directory
+    :param generated_model_card: model card generated by _generate_model_card() method
     """
     readme_path = repo_dir / "README.md"
     readme = ""
@@ -150,30 +208,40 @@ def _create_model_card(repo_dir: Path, generated_model_card):
         f.write(readme)
 
 
-def push_to_hub2(model,
-                 agent_architecture,
-                 env_id,
-                 model_name: str,
-                 eval_env,
-
-                 is_deterministic,
-
-                 repo_id: str,
-                 filename: str,
-                 commit_message: str,
-
-                 n_eval_episodes=10,
-                 use_auth_token=True,
-                 local_repo_path="hub5",
-                 video_length=1000,
+def package_to_hub(model,
+                   model_name: str,
+                   model_architecture: str,
+                   env_id: str,
+                   eval_env,
+                   repo_id: str,
+                   commit_message: str,
+                   is_deterministic=True,
+                   n_eval_episodes=10,
+                   use_auth_token=True,
+                   local_repo_path="hub",
+                   video_length=1000,
                  ):
     """
-      Upload a model to Hugging Face Hub.
+      Evaluate, Generate a video and Upload a model to Hugging Face Hub.
+      This method does the complete pipeline:
+      - It evaluates the model
+      - It generates the model card
+      - It generates a replay video of the agent
+      - It pushes everything to the hub
+      This is a work in progress function, if it does not work, use push_to_hub method
+      :param model: trained model
+      :param model_name: name of the model zip file
+      :param model_architecture: name of the architecture of your model (DQN, PPO, A2C, SAC...)
+      :param env_id: name of the environment
+      :param eval_env: environment used to evaluate the agent
       :param repo_id: repo_id: id of the model repository from the Hugging Face Hub
-      :param filename: name of the model zip or mp4 file from the repository
       :param commit_message: commit message
+      :param is_deterministic: use deterministic or stochastic actions (by default: True)
+      :param n_eval_episodes: number of evaluation episodes (by default: 10)
       :param use_auth_token
       :param local_repo_path: local repository path
+      :param video_length:
+      :param video_length: length of the video (in timesteps)
       """
     huggingface_token = HfFolder.get_token()
 
@@ -231,22 +299,9 @@ def push_to_hub2(model,
     logging.info(f"Pushing repo {repo_name} to the Hugging Face Hub")
     repo.push_to_hub(commit_message=commit_message)
 
-    logging.info(f"View your model in {repo_url}")
-
-    # Todo: I need to have a feedback like:
-    # You can see your model here "https://huggingface.co/repo_url"
-    print("Your model has been uploaded to the Hub, you can find it here: ", repo_url)
+    logging.info(f"Your model is pushed to the hub. You can view your model here: {repo_url}")
     return repo_url
 
-
-README_TEMPLATE = """---
-tags:
-- deep-reinforcement-learning
-- reinforcement-learning
-- stable-baselines3
----
-# TODO: Fill this model card
-"""
 
 def _copy_file(filepath: Path, dst_directory: Path):
     """
