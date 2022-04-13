@@ -152,10 +152,13 @@ def select_tags(env_id):
     """
 
     model_card = f"""
-    ---
+---
       tags:
       - {env_id}
-    ---
+      - deep-reinforcement-learning
+      - reinforcement-learning
+      - stable-baselines3
+---
     """
     return model_card
 
