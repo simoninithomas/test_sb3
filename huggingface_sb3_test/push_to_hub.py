@@ -78,6 +78,8 @@ def _evaluate_agent(model, eval_env, n_eval_episodes, is_deterministic, repo_loc
     # Step 3: Write a JSON file
     with open(Path(repo_local_path) / 'results.json', 'w') as outfile:
         json.dump(evaluate_data, outfile)
+    
+    print("results", mean_reward)
     return mean_reward, std_reward
 
 
@@ -126,7 +128,7 @@ def _generate_replay(model, eval_env, video_length, is_deterministic, repo_local
         # Convert the video with x264 codec
         inp = "./test.mp4"
         out = "replay.mp4"
-        os.system(f"ffmpeg -i {inp} -vcodec h264 {out}".format(inp, out))
+        os.system(f"ffmpeg -y -i {inp} -vcodec h264 {out}".format(inp, out))
         """
         call([ffmpeg,
               '-i', "./replay.mp4",
