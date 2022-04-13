@@ -126,7 +126,7 @@ def _generate_replay(model, eval_env, video_length, is_deterministic, repo_local
         os.rename(env.video_recorder.path, "test.mp4")
 
         # Convert the video with x264 codec
-        inp = env.video_recorder.path #"./test.mp4"
+        inp = "./test.mp4"
         out = "replay.mp4"
         os.system(f"ffmpeg -y -i {inp} -vcodec h264 {out}".format(inp, out))
         """
