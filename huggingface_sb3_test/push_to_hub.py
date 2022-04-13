@@ -243,7 +243,7 @@ def package_to_hub(model,
       :param video_length:
       :param video_length: length of the video (in timesteps)
       """
-    logging.info("This function will save, evaluate, generate a video of your agent, create a model card and push everything to the hub. It might take up to 1min. \n This is a work in progress: If you encounter a bug, please send a message to thomas.simonini@huggingface.co and use push_to_hub instead.")
+    print("This function will save, evaluate, generate a video of your agent, create a model card and push everything to the hub. It might take up to 1min. \n This is a work in progress: If you encounter a bug, please send a message to thomas.simonini@huggingface.co and use push_to_hub instead.")
     huggingface_token = HfFolder.get_token()
 
     temp = repo_id.split('/')
@@ -301,6 +301,7 @@ def package_to_hub(model,
     repo.push_to_hub(commit_message=commit_message)
 
     logging.info(f"Your model is pushed to the hub. You can view your model here: {repo_url}")
+    print(f"Your model is pushed to the hub. You can view your model here: {repo_url}")
     return repo_url
 
 
