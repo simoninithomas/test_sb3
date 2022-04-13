@@ -292,7 +292,7 @@ def package_to_hub(model,
     _generate_replay(model, replay_env, video_length, is_deterministic, repo_local_path)
 
     # Step 5: Generate the model card
-    generated_model_card = _generate_model_card(agent_architecture, env_id, mean_reward, std_reward)
+    generated_model_card = _generate_model_card(model_architecture, env_id, mean_reward, std_reward)
 
     _create_model_card(repo_local_path, generated_model_card)
 
