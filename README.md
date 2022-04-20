@@ -11,8 +11,7 @@ pip install huggingface-sb3
 ## Examples
 We wrote a tutorial on how to use 🤗 Hub and Stable-Baselines3 [here](https://github.com/huggingface/huggingface_sb3/blob/main/Stable_Baselines_3_and_Hugging_Face_%F0%9F%A4%97_tutorial.ipynb)
 
-If you use Colab or a Virtual Machine, you can check Case 3 and Case 4
-
+If you use **Colab or a Virtual/Screenless Machine**, you can check Case 3 and Case 4.
 
 ### Case 1: I want to download a model from the Hub
 ```python
@@ -89,7 +88,7 @@ package_to_hub(model=model,
 ```
 
 
-**With `push_to_hub`:
+**With `push_to_hub()`**:
 ```python
 from huggingface_sb3 import push_to_hub
 from stable_baselines3 import PPO
@@ -115,4 +114,20 @@ push_to_hub(
     filename="ppo-CartPole-v1.zip",
     commit_message="Added Cartpole-v1 model trained with PPO",
 )
+```
+### Case 3: I use Google Colab
+- You can use xvbf (virtual screen)
+```
+!apt-get install -y xvfb python-opengl > /dev/null 2>&1
+```
+- Just put your code inside a python file and run
+```
+!xvfb-run -s "-screen 0 1400x900x24" <your_python_file>
+```
+
+### Case 4: I use a Virtual/Remote Machine
+- You can use xvbf (virtual screen)
+
+```
+xvfb-run -s "-screen 0 1400x900x24" <your_python_file>
 ```
