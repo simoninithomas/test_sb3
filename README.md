@@ -11,6 +11,9 @@ pip install huggingface-sb3
 ## Examples
 We wrote a tutorial on how to use 🤗 Hub and Stable-Baselines3 [here](https://github.com/huggingface/huggingface_sb3/blob/main/Stable_Baselines_3_and_Hugging_Face_%F0%9F%A4%97_tutorial.ipynb)
 
+If you use Colab or a Virtual Machine, you can check Case 3 and Case 4
+
+
 ### Case 1: I want to download a model from the Hub
 ```python
 import gym
@@ -38,22 +41,7 @@ print(f"mean_reward={mean_reward:.2f} +/- {std_reward}")
 
 ### Case 2: I trained an agent and want to upload it to the Hub
 With `package_to_hub()` **we'll save, evaluate, generate a model card and record a replay video of your agent before pushing the repo to the hub**.
-- It currently **works for Gym and Atari environments**. If you use another environment, you should use `push_to_hub()` instead.
-
-#### package_to_hub to save, evaluate, generate a model card and record a replay video of your agent before pushing the repo to the hub
-
-
-
-#### push_to_hub to just push a file to the Hub
-
-
-
-
-
-
-
-
-
+It currently **works for Gym and Atari environments**. If you use another environment, you should use `push_to_hub()` instead.
 
 First you need to be logged in to Hugging Face:
 - If you're using Colab/Jupyter Notebooks:
@@ -65,7 +53,43 @@ notebook_login()
 ```
 huggingface-cli login
 ```
-Then:
+Then
+
+**With `package_to_hub()`**:
+
+```python
+import gym
+
+from stable_baselines3 import PPO
+from stable_baselines3.common.evaluation import evaluate_policy
+from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
+from huggingface_sb3_test import load_from_hub, package_to_hub
+
+# Create the environment
+env_id = 'LunarLander-v2'
+env = DummyVecEnv([lambda: gym.make(env_id)])
+
+# Create the evaluation env
+eval_env = DummyVecEnv([lambda: gym.make(env_id)])
+
+# Instantiate the agent
+model = PPO('MlpPolicy', env, verbose=1)
+
+# Train the agent
+model.learn(total_timesteps=int(5000))
+
+# This method save, evaluate, generate a model card and record a replay video of your agent before pushing the repo to the hub
+package_to_hub(model=model, 
+               model_name="ppo-LunarLander-v2",
+               model_architecture="PPO",
+               env_id=env_id,
+               eval_env = eval_env,
+               repo_id="ThomasSimonini/TEST2-Colab-ppo-LunarLander-v2",
+               commit_message="Test commit")
+```
+
+
+**With `push_to_hub`:
 ```python
 from huggingface_sb3 import push_to_hub
 from stable_baselines3 import PPO
