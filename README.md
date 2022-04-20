@@ -1,4 +1,4 @@
-# Hugging Face 🤗 x Stable-baselines3
+# Hugging Face 🤗 x Stable-baselines3 v2.0
 
 A library to load and upload Stable-baselines3 models from the Hub.
 
@@ -37,6 +37,24 @@ print(f"mean_reward={mean_reward:.2f} +/- {std_reward}")
 ```
 
 ### Case 2: I trained an agent and want to upload it to the Hub
+With `package_to_hub()` **we'll save, evaluate, generate a model card and record a replay video of your agent before pushing the repo to the hub**.
+- It currently **works for Gym and Atari environments**. If you use another environment, you should use `push_to_hub()` instead.
+
+#### package_to_hub to save, evaluate, generate a model card and record a replay video of your agent before pushing the repo to the hub
+
+
+
+#### push_to_hub to just push a file to the Hub
+
+
+
+
+
+
+
+
+
+
 First you need to be logged in to Hugging Face:
 - If you're using Colab/Jupyter Notebooks:
 ```python
@@ -52,8 +70,11 @@ Then:
 from huggingface_sb3 import push_to_hub
 from stable_baselines3 import PPO
 
-# Define a PPO model with MLP policy network
-model = PPO("MlpPolicy", "CartPole-v1", verbose=1)
+env = make_atari_env('SpaceInvadersNoFrameskip-v4', n_envs=1, seed=0)
+env = VecFrameStack(env, n_stack=4)
+
+# Define a PPO model with CNN policy network
+model = PPO("CnnPolicy", "CartPole-v1", verbose=1)
 
 # Train it for 10000 timesteps
 model.learn(total_timesteps=10_000)
